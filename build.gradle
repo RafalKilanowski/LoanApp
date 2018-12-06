@@ -1,0 +1,112 @@
+buildscript {
+    ext {
+        releasePluginVersion = '2.4.0'
+        changelogPlugin = '1.50'
+        dependencyManagementPluginVersion = '1.0.6.RELEASE'
+        springBootVersion = '2.0.4.RELEASE'
+
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath("net.researchgate:gradle-release:${releasePluginVersion}")
+        classpath("gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:${changelogPlugin}")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'net.researchgate.release'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'se.bjurr.gitchangelog.git-changelog-gradle-plugin'
+apply plugin: "groovy"
+apply plugin: 'checkstyle'
+apply plugin: "jacoco"
+apply plugin: 'pmd'
+
+
+checkstyle {
+    toolVersion = "8.11"
+}
+
+apply from: "$rootDir/versions.gradle"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+apply plugin: 'war'
+
+war {
+    baseName = jar.baseName
+    version = ''
+    enabled = true
+}
+
+jar.doFirst {
+    manifest {
+        attributes      \
+		     'Implementation-Title': jar.baseName,      \
+		     'Implementation-Version': jar.version,      \
+		     'Built-By': System.getProperty('user.name'),      \
+		     'Built-JDK': System.getProperty('java.version'),      \
+		     'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+    }
+}
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+dependencyManagement {
+    imports {
+        mavenBom "io.spring.platform:platform-bom:${springPlatformVersion}"
+    }
+}
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-starter"
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.springframework.boot:spring-boot-starter-data-mongodb-reactive"
+    compile "org.springframework.boot:spring-boot-starter-log4j2"
+    compile "io.vavr:vavr:${vavrVersion}"
+    compile "io.vavr:vavr-jackson:${vavrVersion}"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonDatatypeTime}"
+    compile "org.aspectj:aspectjtools"
+    compile "io.springfox:springfox-swagger2:${swaggerVersion}"
+    compile "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+
+
+
+    compileOnly('org.projectlombok:lombok')
+
+    testCompile "org.springframework.boot:spring-boot-starter-test"
+    testCompile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    testCompile "org.spockframework:spock-core:${spockVersion}"
+    testCompile "org.spockframework:spock-spring:${spockVersion}"
+    testCompile "org.hamcrest:hamcrest-core:${hamcrestVersion}"
+    testCompile "de.flapdoodle.embed:de.flapdoodle.embed.mongo:${flapdoodleVersion}"
+    testCompile "cz.jirutka.spring:embedmongo-spring:${jirutkaVersion}"
+    testCompile "com.lordofthejars:nosqlunit-mongodb:${noSqlUnitVersion}"
+
+    testRuntime "net.bytebuddy:byte-buddy:${byteBuddyVersion}"
+    testRuntime "org.objenesis:objenesis:${objenesisVersion}"
+}
+
+configurations.all {
+    exclude module: 'spring-boot-starter-logging'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.9'
+}

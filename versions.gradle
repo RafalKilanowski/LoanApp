@@ -1,0 +1,15 @@
+ext {
+    byteBuddyVersion = '1.6.5'
+    flapdoodleVersion = '1.50.5'
+    fongoVersion = '2.1.1'
+    groovyVersion = '2.4.15'
+    hamcrestVersion = '1.3'
+    jacksonDatatypeTime = '2.9.2'
+    jirutkaVersion = '1.3.1'
+    noSqlUnitVersion = '0.14.0'
+    objenesisVersion = '2.5.1'
+    spockVersion = '1.1-groovy-2.4'
+    springPlatformVersion = 'Cairo-SR3'
+    swaggerVersion = '2.9.2'
+    vavrVersion = '0.9.0'
+}
