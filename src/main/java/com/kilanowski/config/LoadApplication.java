@@ -9,7 +9,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableSwagger2
-@EnableMongoRepositories(basePackages = "com.kilanowski.*")
+@EnableMongoRepositories(basePackages = "com.kilanowski.app.*")
 @ComponentScan(basePackages = {"com.kilanowski.*"})
 public class LoadApplication extends SpringBootServletInitializer {
 

@@ -1,7 +1,6 @@
-package com.kilanowski.app.time;
+package com.kilanowski.time;
 
 import java.time.Instant;
-import java.time.Year;
 
 public interface CurrentTimeService {
 

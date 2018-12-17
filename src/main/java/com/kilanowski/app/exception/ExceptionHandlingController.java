@@ -20,5 +20,10 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
+    @ExceptionHandler(value = InvalidRequestException.class)
+    protected ResponseEntity<Object> handleInvalidRequestException(InvalidRequestException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
 
 }

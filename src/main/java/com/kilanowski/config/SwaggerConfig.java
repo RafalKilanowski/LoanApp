@@ -21,7 +21,7 @@ import static java.lang.String.format;
 @Configuration
 class SwaggerConfig {
 
-    private static final String GENERATE_SWAGGER_REGEX = ".*(requests).*";
+    private static final String GENERATE_SWAGGER_REGEX = ".*(loan).*";
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
