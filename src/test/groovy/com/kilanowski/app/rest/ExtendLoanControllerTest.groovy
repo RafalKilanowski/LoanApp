@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.kilanowski.app.domain.Loan
+import com.kilanowski.app.domain.LoanMotherObject
 import com.kilanowski.app.domain.LoanRepository
-import com.kilanowski.app.domain.request.ApplyForLoanRequest
-import com.kilanowski.time.CurrentTimeService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
@@ -15,26 +14,19 @@ import org.springframework.test.web.servlet.MockMvc
 import spock.lang.Specification
 
 import java.time.LocalDate
-import java.time.Period
 
-import static java.lang.Boolean.*
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest
-class ApplyForLoanControllerTest extends Specification {
+class ExtendLoanControllerTest extends Specification {
 
-    public static final Period TERM_OF_LOAN = Period.ofDays(100)
-    public static final int AMOUNT_OF_LOAN = 10000
     public static final LocalDate START_DATE_OF_LOAN = LocalDate.of(2018, 12, 24)
     @Autowired
     private MockMvc mockMvc
 
     @Autowired
     private LoanRepository repository
-
-    @Autowired
-    private CurrentTimeService timeService
 
     private ObjectWriter objectWriter
 
@@ -47,28 +39,21 @@ class ApplyForLoanControllerTest extends Specification {
         objectWriter = mapper.writer().withDefaultPrettyPrinter()
     }
 
-    def "Should create loan based on a request"() {
+
+    def "Should extend loan for given loan id"() {
         given:
-        ApplyForLoanRequest request = aRequest()
-        String requestAsString = objectWriter.writeValueAsString(request)
+        Loan loan = LoanMotherObject.aLoanWithoutExtension()
+        repository.save(loan)
 
         when:
-        mockMvc.perform(post("/loan")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestAsString))
-                .andExpect(status().isCreated())
+        mockMvc.perform(post("/loan/" + loan.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isAccepted())
         then:
-        repository.count() == 1
-        Loan loan = repository.findAll().get(0)
-        loan.creationTime.toEpochMilli() == timeService.now().toEpochMilli()
-        loan.amount.compareTo(AMOUNT_OF_LOAN) == 0
-        loan.amountWithInterest == 11000
-        loan.period == TERM_OF_LOAN
-        loan.endDate.compareTo(LocalDate.of(2019,4,3)) == 0
-        loan.isExtended == FALSE
+        Loan extendedLoan = repository.findById(loan.getId()).get()
+        extendedLoan.isExtended == Boolean.TRUE
+        extendedLoan.extendedEndDate.compareTo(LocalDate.of(2019, 10, 28)) == 0
     }
 
-    ApplyForLoanRequest aRequest() {
-        new ApplyForLoanRequest(AMOUNT_OF_LOAN, START_DATE_OF_LOAN, TERM_OF_LOAN)
-    }
+
 }

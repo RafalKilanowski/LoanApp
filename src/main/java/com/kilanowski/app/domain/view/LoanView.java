@@ -22,5 +22,7 @@ public class LoanView {
 
     private LocalDate startDate;
 
+    private LocalDate endDate;
+
     private Period period;
 }

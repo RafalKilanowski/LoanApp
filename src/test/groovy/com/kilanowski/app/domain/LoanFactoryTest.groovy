@@ -13,7 +13,7 @@ import java.time.Period
 import static java.time.Period.ofDays
 
 
-class LoanFactorySpec extends Specification {
+class LoanFactoryTest extends Specification {
 
     private static final long INVALID_HOUR_FOR_A_LOAN = 1545008400000L
     private static final long VALID_HOUR_FOR_A_LOAN = 1545037200000L
@@ -30,7 +30,9 @@ class LoanFactorySpec extends Specification {
 
     private CurrentTimeService currentTimeService = Mock()
 
-    private LoanFactory loanFactory = new LoanFactory(repository, configService, currentTimeService)
+    private LoanInterestCalculator interestCalculator = Mock()
+
+    private LoanFactory loanFactory = new LoanFactory(repository, configService, interestCalculator, currentTimeService)
 
 
     def "Should return 400 when user is trying to request a loan with max amount between 0 a.m and 6 a.m"() {

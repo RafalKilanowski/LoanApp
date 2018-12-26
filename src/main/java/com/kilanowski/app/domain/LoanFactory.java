@@ -13,23 +13,22 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-import static java.math.BigDecimal.valueOf;
-import static java.math.RoundingMode.CEILING;
 
 @Service
 @Log4j2
 @AllArgsConstructor
 class LoanFactory implements ApplyForLoanPort {
 
-    private static final BigDecimal INTEREST = valueOf(1.1).setScale(2, CEILING);
     private static final int MAX_LOAN_HOUR = 6;
 
     private LoanRepository repository;
 
     private LoanConfigService loanConfigService;
+
+    private LoanInterestCalculator interestCalculator;
 
     private CurrentTimeService timeService;
 
@@ -69,19 +68,19 @@ class LoanFactory implements ApplyForLoanPort {
     }
 
     private Loan buildWith(ApplyForLoanRequest request) {
-        BigDecimal loanWithInterest = calculate(request.getAmount());
+        BigDecimal loanWithInterest = interestCalculator.calculate(request.getAmount());
+        LocalDate endDate = request.getStartDate().plus(request.getPeriod());
         return Loan.builder()
                 .amount(request.getAmount())
                 .amountWithInterest(loanWithInterest)
                 .creationTime(timeService.now())
                 .startDate(request.getStartDate())
+                .endDate(endDate)
+                .isExtended(Boolean.FALSE)
                 .period(request.getPeriod())
                 .build();
     }
 
-    private BigDecimal calculate(BigDecimal amount) {
-        return amount.multiply(INTEREST);
-    }
 
     private LoanView toLoanView(Loan loan) {
         return LoanView.builder()

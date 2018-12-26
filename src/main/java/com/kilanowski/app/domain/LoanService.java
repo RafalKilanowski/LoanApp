@@ -3,20 +3,21 @@ package com.kilanowski.app.domain;
 import com.kilanowski.app.domain.port.ExtendLoanPort;
 import com.kilanowski.app.domain.port.RetrieveLoanPort;
 import com.kilanowski.app.domain.request.ExtendLoanRequest;
-import com.kilanowski.app.domain.view.LoanConfigView;
 import com.kilanowski.app.domain.view.LoanView;
 import com.kilanowski.app.exception.InvalidRequestException;
 import com.kilanowski.app.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Period;
+
 @Service
 @AllArgsConstructor
 public class LoanService implements RetrieveLoanPort, ExtendLoanPort {
 
-    private LoanRepository repository;
+    private static Period EXTENSION_TERM = Period.ofDays(200);
 
-    private LoanConfigService loanConfigService;
+    private LoanRepository repository;
 
     @Override
     public LoanView retrieve(String loanId) {
@@ -25,18 +26,14 @@ public class LoanService implements RetrieveLoanPort, ExtendLoanPort {
     }
 
     @Override
-    public void apply(String loanId, ExtendLoanRequest request) {
-        Loan loan = repository.findById(loanId).orElseThrow(() -> new ResourceNotFoundException("No loan for id : " + loanId));
-        assertTermOfLoanIsBelowMaxTerm(loan, request);
-        loan.extend(request.getExtensionTerm());
-        repository.save(loan);
-
-    }
-
-    private void assertTermOfLoanIsBelowMaxTerm(Loan loan, ExtendLoanRequest request) {
-        LoanConfigView loanConfigView = loanConfigService.retrieve();
-        if (loan.getPeriod().plus(request.getExtensionTerm()).getDays() > loanConfigView.getMaxTerm().getDays()) {
-            throw new InvalidRequestException("Extension term is above max term of a loan!");
+    public void extend(ExtendLoanRequest request) {
+        Loan loan = repository.findById(request.getLoanId())
+                .orElseThrow(() -> new ResourceNotFoundException("No loan for id : " + request.getLoanId()));
+        if (loan.isExtended()) {
+            throw new InvalidRequestException("Loan with id " + request.getLoanId() + " is already extended");
         }
+
+        loan.extend(EXTENSION_TERM);
+        repository.save(loan);
     }
 }

@@ -29,13 +29,25 @@ public class Loan {
     private LocalDate startDate;
 
     @NotNull
+    private LocalDate endDate;
+
+    @NotNull
     private Period period;
+
+    private LocalDate extendedEndDate;
 
     @NotNull
     private Instant creationTime;
 
+    private Boolean isExtended;
+
 
     public void extend(Period extensionTerm) {
-        period = period.plus(extensionTerm);
+        extendedEndDate = endDate.plus(extensionTerm);
+        isExtended = Boolean.TRUE;
+    }
+
+    public boolean isExtended() {
+        return isExtended;
     }
 }

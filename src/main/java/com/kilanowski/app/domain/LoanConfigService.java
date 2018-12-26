@@ -28,10 +28,14 @@ public class LoanConfigService implements RetrieveLoanConfigPort {
     @Override
     public LoanConfigView retrieve() {
         List<LoanConfig> loanConfigs = repository.findAll();
-        if (loanConfigs.size() != 1) {
-            return getDefaultLoanConfig();
+        if (isOnlyOneConfiguration(loanConfigs)) {
+            return toLoanConfigView(loanConfigs.get(0));
         }
-        return toLoanConfigView(loanConfigs.get(0));
+        return getDefaultLoanConfig();
+    }
+
+    private boolean isOnlyOneConfiguration(List<LoanConfig> loanConfigs) {
+        return loanConfigs.size() == 1;
     }
 
 
